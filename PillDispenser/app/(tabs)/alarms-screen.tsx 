@@ -1,0 +1,267 @@
+// app/(tabs)/alarms-screen.tsx - VERSIÓN CORREGIDA
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  Switch
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+// Datos de ejemplo para pruebas
+const mockAlarms = [
+  {
+    medicationId: '1',
+    medicationName: 'Aspirina',
+    dosage: '500mg',
+    time: '08:00',
+    alarmId: '1_0800',
+    enabled: true
+  },
+  {
+    medicationId: '1', 
+    medicationName: 'Aspirina',
+    dosage: '500mg',
+    time: '20:00',
+    alarmId: '1_2000',
+    enabled: true
+  },
+  {
+    medicationId: '2',
+    medicationName: 'Vitaminas',
+    dosage: '1 tableta',
+    time: '09:00',
+    alarmId: '2_0900',
+    enabled: false
+  }
+];
+
+export default function AlarmsScreen() {
+  const [alarms, setAlarms] = useState(mockAlarms);
+
+  const toggleAlarm = (alarmId: string, enabled: boolean) => {
+    setAlarms(prev => 
+      prev.map(alarm => 
+        alarm.alarmId === alarmId ? { ...alarm, enabled } : alarm
+      )
+    );
+    
+    Alert.alert(
+      enabled ? '✅ Alarma activada' : '🔕 Alarma desactivada',
+      'Funcionalidad de notificaciones en desarrollo'
+    );
+  };
+
+  const deleteAlarm = (alarmId: string) => {
+    Alert.alert(
+      'Eliminar Alarma',
+      '¿Estás seguro de que quieres eliminar esta alarma?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: () => {
+            setAlarms(prev => prev.filter(alarm => alarm.alarmId !== alarmId));
+            Alert.alert('✅', 'Alarma eliminada');
+          }
+        }
+      ]
+    );
+  };
+
+  const renderAlarmItem = ({ item }: { item: any }) => (
+    <View style={styles.alarmCard}>
+      <View style={styles.alarmInfo}>
+        <View style={styles.alarmHeader}>
+          <Text style={styles.medicationName}>{item.medicationName}</Text>
+          <Text style={styles.alarmTime}>{item.time}</Text>
+        </View>
+        <Text style={styles.dosage}>Dosis: {item.dosage}</Text>
+        <Text style={styles.status}>
+          Estado: {item.enabled ? '🟢 Activa' : '🔴 Inactiva'}
+        </Text>
+      </View>
+
+      <View style={styles.alarmControls}>
+        <Switch
+          value={item.enabled}
+          onValueChange={(enabled) => toggleAlarm(item.alarmId, enabled)}
+          trackColor={{ false: '#767577', true: '#81b0ff' }}
+          thumbColor={item.enabled ? '#007AFF' : '#f4f3f4'}
+        />
+        
+        <TouchableOpacity 
+          onPress={() => deleteAlarm(item.alarmId)}
+          style={styles.deleteButton}
+        >
+          <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  const getAlarmsSummary = () => {
+    const activeCount = alarms.filter(a => a.enabled).length;
+    const totalCount = alarms.length;
+    
+    return {
+      activeCount,
+      totalCount,
+      nextAlarm: alarms.find(a => a.enabled) || null
+    };
+  };
+
+  const summary = getAlarmsSummary();
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>⏰ Alarmas Activas</Text>
+      
+      {/* Resumen */}
+      <View style={styles.summaryCard}>
+        <Text style={styles.summaryTitle}>Resumen</Text>
+        <View style={styles.summaryRow}>
+          <View style={styles.summaryItem}>
+            <Text style={styles.summaryNumber}>{summary.activeCount}</Text>
+            <Text style={styles.summaryLabel}>Activas</Text>
+          </View>
+          <View style={styles.summaryItem}>
+            <Text style={styles.summaryNumber}>{summary.totalCount}</Text>
+            <Text style={styles.summaryLabel}>Total</Text>
+          </View>
+        </View>
+        {summary.nextAlarm && (
+          <Text style={styles.nextAlarm}>
+            Próxima: {summary.nextAlarm.medicationName} a las {summary.nextAlarm.time}
+          </Text>
+        )}
+      </View>
+
+      {/* Lista de Alarmas */}
+      <FlatList
+        data={alarms}
+        keyExtractor={(item) => item.alarmId}
+        renderItem={renderAlarmItem}
+        style={styles.list}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#F5F5F5',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+    textAlign: 'center',
+  },
+  summaryCard: {
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#333',
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  summaryItem: {
+    alignItems: 'center',
+  },
+  summaryNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#007AFF',
+  },
+  summaryLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  },
+  nextAlarm: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#EEE',
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+  },
+  list: {
+    flex: 1,
+  },
+  alarmCard: {
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  alarmInfo: {
+    flex: 1,
+  },
+  alarmHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  medicationName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  alarmTime: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#007AFF',
+  },
+  dosage: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 2,
+  },
+  status: {
+    fontSize: 12,
+    color: '#666',
+  },
+  alarmControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  deleteButton: {
+    padding: 8,
+  },
+});
