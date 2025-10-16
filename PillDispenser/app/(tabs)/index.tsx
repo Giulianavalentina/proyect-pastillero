@@ -10,8 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { MedicationService, Medication } from '../services/medicationService';
-
+import { MedicationService, Medication } from '../../src/services/medicationService';
 export default function MedicationsScreen() {
   const router = useRouter();
   const [medications, setMedications] = useState<Medication[]>([]);

@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { MedicationService } from './services/medicationService';
+import { MedicationService } from '../src/services/medicationService';
 
 export default function AddMedicationScreen() {
   const router = useRouter();
